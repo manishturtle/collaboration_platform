@@ -17,10 +17,21 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+# urlpatterns = [
+#     path('admin/', admin.site.urls),  
+#     # App URLs
+#     path('api/v1/chat/', include('apps.chat.api.urls')),
+#     path('api/v1/', include('apps.common.urls')),  # New authentication endpoints
+# ]
+
+
+
 urlpatterns = [
     path('admin/', admin.site.urls),
-    # ... other project urls
-    
-    # Add this line
-    path('api/v1/chat/', include('apps.chat.api.urls')),
+    path('api/v1/<str:tenant_slug>/', include([
+        path('chat/', include('apps.chat.api.urls')),
+        path('common/', include('apps.common.urls')),
+    ])),
+
+    path('api/v1/', include('apps.common.urls')),
 ]

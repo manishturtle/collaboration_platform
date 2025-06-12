@@ -26,21 +26,63 @@ ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 # Application definition
 
-INSTALLED_APPS = [
+# INSTALLED_APPS = [
+#     'django.contrib.admin',
+#     'django.contrib.auth',
+#     'django.contrib.contenttypes',
+#     'django.contrib.sessions',
+#     'django.contrib.messages',
+#     'django.contrib.staticfiles',
+    
+#     # Third-party apps
+#     'rest_framework',
+    
+#     # Local apps
+#     'apps.common',
+#     'apps.chat',
+# ]
+
+# ASGI application for Django Channels
+ASGI_APPLICATION = 'collaboration_backend.asgi.application'
+
+# Channel layers configuration for WebSockets
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('redis', 6379)],  # Using 'redis' as service name for Docker
+        },
+    },
+}
+
+SHARED_APPS = (
+    'django_tenants',  # Must come before django.contrib.contenttypes
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'channels',  # Add channels to shared apps
     'django.contrib.staticfiles',
-    
-    # Third-party apps
     'rest_framework',
-    
-    # Local apps
+)
+
+TENANT_APPS = (
     'apps.common',
     'apps.chat',
-]
+)
+
+INSTALLED_APPS = SHARED_APPS + TENANT_APPS
+
+# Tenant configuration
+TENANT_MODEL = 'common.Tenant'
+TENANT_DOMAIN_MODEL = 'common.Domain'
+
+# Database routing
+
+# Keep django_tenants router first for proper initialization
+DATABASE_ROUTERS = ['django_tenants.routers.TenantSyncRouter']
+# DATABASE_ROUTERS = ['apps.chat.router.TenantRouter']
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -72,18 +114,41 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'collaboration_backend.wsgi.application'
 
-# Database
+import os
+from datetime import timedelta
+
+# Database - Django-tenants configuration
 DATABASES = {
     'default': {
-        'ENGINE': os.getenv('DB_ENGINE', 'django.db.backends.postgresql'),
-        'NAME': os.getenv('DB_NAME', 'CollaborationPlatform'),
-        # Keep these settings for when switching back to PostgreSQL
+        'ENGINE': 'django_tenants.postgresql_backend',  # Add tenant support to PostgreSQL
+        'NAME': os.getenv('DB_NAME', 'iam_login'),
         'USER': os.getenv('DB_USER', 'postgres'),
         'PASSWORD': os.getenv('DB_PASSWORD', 'Qu1ckAss1st@123'),
         'HOST': os.getenv('DB_HOST', 'localhost'),
         'PORT': os.getenv('DB_PORT', '5432'),
     }
 }
+
+# Required django-tenants settings
+DATABASE_ROUTERS = ['django_tenants.routers.TenantSyncRouter', 'apps.chat.router.TenantRouter']
+
+# Name of the schema for the public tenant (usually 'public')
+PUBLIC_SCHEMA_NAME = 'public'
+
+# The schema name that will be used for tenant-specific tables
+DEFAULT_TENANT_SCHEMA = 'turtlesoftware'
+
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'ROTATE_REFRESH_TOKENS': False,
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': 'abc123',
+    # 'AUTH_HEADER_TYPES': ('Bearer',),
+}
+
+# DATABASE_ROUTERS already defined above
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -133,3 +198,12 @@ REST_FRAMEWORK = {
     'UNAUTHENTICATED_USER': None,
     'EXCEPTION_HANDLER': 'apps.common.utils.custom_exception_handler'
 }
+
+# Authentication Configuration - Used for the JWT authentication API
+# These settings define the database table and field names for authenticating users
+AUTH_TABLE = 'public.auth_user'  # Default Django user table
+AUTH_TABLE_USERNAME_FIELD = 'username' 
+AUTH_TABLE_EMAIL_FIELD = 'email'
+AUTH_TABLE_PASSWORD_FIELD = 'password'  # This should be a hashed password field
+AUTH_TABLE_USER_ID_FIELD = 'id'
+AUTH_TABLE_TENANT_ID_FIELD = 'id'  # Using ID as tenant ID for now

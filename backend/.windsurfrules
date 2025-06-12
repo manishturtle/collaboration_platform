@@ -1,0 +1,250 @@
+When generating code, always consider these NFRs. Prioritize security, performance, and maintainability. Use the specified technology stack, coding standards, style guides and best practices. Assume a multi-tenant environment.  Ask clarifying questions if anything is unclear."
+
+# Project Context
+- We are building a scalable, multi-tenant SaaS ERP system encompassing E-commerce and CRM. 
+- Each tenant has its own separate schema in the PostgreSQL database.
+- This project aims to build a scalable, multi-tenant SaaS platform that combines E-commerce and CRM functionalities.
+- The initial focus is on a robust Product and Inventory Management module, with future expansion planned.
+- The application will be built with a decoupled architecture, designed for eventual migration to microservices.
+- Multi-Tenancy: Schema-per-tenant in PostgreSQL. Each tenant has its own database schema.
+
+# Tech Stack and libraries:
+- Frontend: Next.js 15, MUI v6
+- Backend: Python Django 4.2, Django REST Framework
+- Database: PostgreSQL 17
+- TypeScript
+- Use the 'react-i18next' library for internationalization on the front-end. Use translation keys for all text displayed to the user.
+- Asynchronous Tasks: Celery (Python) with Redis.
+- API: RESTful (primary), potentially GraphQL.
+- Authentication: OAuth2 with JWT.
+
+# General Code Style & Formatting
+- Use functional and declarative programming patterns; avoid classes.
+- Prefer iteration and modularization over code duplication.
+- Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError).
+- Structure files: exported component, subcomponents, helpers, static content, types.
+- Follow the Airbnb Style Guide for code formatting.
+
+# Naming Conventions
+- Favor named exports for components.
+- React Components: PascalCase (e.g., `UserCard`, `ProductForm`)
+- Files and Directories: kebab-case (e.g., `product-details`, `user-management`)
+- Variables, Functions, Methods: camelCase (e.g., `productName`, `calculateTotalPrice`)
+- Classes (Python): PascalCase
+- Constants: UPPERCASE_SNAKE_CASE (e.g., `MAX_UPLOAD_SIZE`)
+- Environment Variables: UPPERCASE
+- Avoid magic numbers and define constants.
+
+# TypeScript Best Practices
+- Use TypeScript for all code; prefer interfaces over types.
+- Avoid any and enums; use explicit types and maps instead.
+- Use functional components with TypeScript interfaces.
+- Define strict types for message passing between different parts of the extension.
+- Use English for all code and documentation.
+- Always declare the type of each variable and function (parameters and return value).
+- Avoid using any.
+- Create necessary types.
+- JSDoc: Use JSDoc comments to document all public functions, components, and interfaces. Include descriptions, parameter types, and return types.
+- Don't leave blank lines within a function.
+- One export per file.
+- Use absolute imports (starting with `@/`) for all internal modules. Configure your `tsconfig.json` and Next.js configuration to support this. Example:
+     ```typescript
+     import { Product } from '@/types/Product';
+     import { Button } from '@/components/Button';
+     ```
+
+- Avoid try/catch blocks unless there's good reason to translate or handle error in that abstraction
+- Use explicit return types for all functions
+
+# Functions & Logic
+- Keep functions short and single-purpose (<20 lines).
+- Avoid deeply nested blocks by:
+- Using early returns.
+- Extracting logic into utility functions.
+- Use higher-order functions (map, filter, reduce) to simplify logic.
+- Use arrow functions for simple cases (<3 instructions), named functions otherwise.
+- Use default parameter values instead of null/undefined checks.
+- Use RO-RO (Receive Object, Return Object) for passing and returning multiple parameters.
+
+# Data Handling
+- Avoid excessive use of primitive types; encapsulate data in composite types.
+- Avoid placing validation inside functions—use classes with internal validation instead.
+- Prefer immutability for data:
+- Use readonly for immutable properties.
+- Use as const for literals that never change.
+
+# Syntax & Formatting
+- Use the function keyword for pure functions.
+- Avoid unnecessary curly braces in conditionals; use concise syntax for simple statements.
+- Use declarative JSX.
+- Use Prettier for consistent code formatting.
+
+# Styling & UI
+- Use MUI's built-in components for common UI patterns and layouts.
+- Implement responsive design with Flexbox and useWindowDimensions.
+- Use styled-components or MUI for styling.
+- Implement dark mode support using MUI Theming.
+- Assume a custom theme is defined and accessible via the standard MUI theming mechanisms.  
+- Ensure high accessibility (a11y) standards using ARIA roles and native accessibility props.
+- Intuitive UI: The user interface should be intuitive and easy to use.
+
+# Data Fetching & Forms
+- Use TanStack Query (react-query) for frontend data fetching.
+- Use React Hook Form for form handling.
+- Use Zod for validation.
+
+# State Management & Logic
+- Use React Context for state management.
+- Implement proper cleanup in useEffect hooks
+
+#Python Best Practices
+- Use type hints consistently
+- Optimize for readability over premature optimization
+- Write modular code, using separate files for models, data loading, training, and evaluation
+- Follow PEP8 style guide for Python code
+- Use docstrings (triple quotes) to document *all* modules, classes, and functions. Follow a consistent docstring format (e.g., Google style or NumPy style).
+- Type Hints: Use type hints for *all* function parameters and return values.
+
+# React Component Structure:
+- Single Export: One component per file. Use a *named export* for the component.
+- File Structure: Organize files within a component directory as follows:
+   - `ComponentName.tsx` (main component file)
+   - `ComponentName.styles.ts` (or `.js`, if using styled-components/MUI styling)
+   - `ComponentName.types.ts` (for component-specific types and interfaces)
+   - `ComponentName.test.tsx` (for unit tests)
+   - `useComponentName.ts` (for custom hooks related to this component - *if needed*)
+   - `components/` (subdirectory for subcomponents *specific* to this component)
+ Example:
+     ```
+     components/
+       ProductCard/
+         ProductCard.tsx
+         ProductCard.styles.ts  (or ProductCard.styles.js)
+         ProductCard.types.ts
+         ProductCard.test.tsx
+         useProductCard.ts  (if needed)
+         components/
+           AddToCartButton.tsx
+           PriceDisplay.tsx
+     ```
+
+# Project Structure, Architecture and NFRs
+- Follow Next.js patterns and use the App Router.
+- Correctly determine when to use server vs. client components in Next.js.
+- Follow Test Driven Development Approach
+- Implement Component Driven architecture focusing on readability, modularity and scalability.
+- Monolithic application initially with eventual migration to a microservices architecture. 
+- Single PostgreSQL database with schema-based multi-tenancy.
+- Caching: Implement caching (Redis) to reduce database load.
+- Use of Django ORM over direct DB queries.
+
+# Error Handling
+- Implement proper error boundaries
+- Log errors (with sufficient context, including the user ID, the current URL, and any relevant data) to a logging service (for debugging and monitoring). Use a structured logging format
+- Provide user-friendly error messages
+- Handle network failures gracefully
+- API Error Handling: Handle API errors (network failures, server errors) gracefully. Display appropriate messages to the user, and implement retry mechanisms where appropriate (using `react-query`'s built-in retry functionality). API Error responses should follow a consistent format:
+     ```json
+     {
+       "error": "true",
+       "code": "invalid_input",  //  A short, machine-readable error code
+       "message": "Invalid input provided.", // A human-readable error message
+       "details": {  //  Optional: More detailed information about the error
+         "field_errors": {
+           "productName": ["This field is required.", "Product name must be unique."],
+           "sku": ["This field is required."]
+         }
+       }
+     }
+     ```
+# API Design (RESTful):
+- Use Django REST Framework (DRF) for building *all* API endpoints.
+- Follow RESTful principles:
+     - Use appropriate HTTP methods (GET, POST, PUT, PATCH, DELETE) for each operation.
+     - Use meaningful resource URLs (e.g., `/api/v1/products/`, `/api/v1/products/{id}/`).
+     - Return appropriate HTTP status codes (200 OK, 201 Created, 400 Bad Request, 404 Not Found, 500 Internal Server Error, etc.).  Be *consistent* in your use of status codes.
+     - Use JSON for request and response bodies.
+ - Version your API (e.g., `/api/v1/products/`). This allows you to make changes to the API without breaking existing clients.
+ - Use DRF's built-in features for pagination, filtering, and sorting.
+ - Example:
+     *GET /api/v1/products/  (List products - support filtering, sorting, pagination)*
+    * GET /api/v1/products/{id}/ (Retrieve a single product)*
+     *POST /api/v1/products/ (Create a new product)*
+     *PUT /api/v1/products/{id}/ (Update a product completely)*
+     *PATCH /api/v1/products/{id}/ (Update a product partially)*
+    * DELETE /api/v1/products/{id}/ (Delete a product)*
+
+# Multi-Tenancy (Schema-per-Tenant):
+ - `django-tenant-schemas`: Use the `django-tenant-schemas` library to implement schema-based multi-tenancy. This simplifies the management of separate schemas for each tenant.
+ - Dynamic Schema: *Always* use the `get_schema_name()` function (provided below, adapt to your project) to determine the current tenant's schema name *before* constructing any database queries (through the Django ORM). *Never hardcode schema names.
+
+- get_schema_name() (Example - adapt to your project's actual implementation):
+```python
+def get_schema_name():
+"""
+Retrieves the current tenant's schema name. This is a placeholder;
+in a real application, you would get this from the request context
+(e.g., from a middleware that inspects the request's domain or a header).
+"""
+- All Django models that are tenant-specific should inherit from a base class that automatically sets the correct schema using django-tenant-schemas. Refer to the django-tenant-schemas documentation for the specific implementation details.
+Security:
+- Authentication: Implement secure user authentication using OAuth2 with JWT. Implement proper token validation, refresh token mechanisms, and token revocation.
+- Authorization: Implement role-based access control (RBAC). Define clear roles (e.g., "admin," "product_manager," "customer_service," "customer") and permissions (e.g., "can_create_products," "can_adjust_inventory," "can_manage_users"). Use Django's built-in permission system (groups and permissions) or a library like django-guardian for object-level permissions.
+
+# Testing
+- Test-Driven Development (TDD): Write unit tests before implementing functionality. This helps to clarify requirements and ensure that your code works as expected.
+- Unit Tests: Write unit tests for all utility functions, React components, and Django models/views/serializers. Aim for high test coverage (ideally > 80%).
+- Frontend: Use Jest and React Testing Library for unit testing React components.
+- Backend: Use Django's built-in testing framework (based on unittest) and pytest.
+- Integration Tests: Test the interactions between different parts of the system (e.g., components interacting with the API, API endpoints interacting with the database).
+- End-to-End (E2E) Tests: Use Playwright to write E2E tests that simulate user interactions with the entire application (browser automation). These tests should cover critical user flows (e.g., adding a product to the cart, completing checkout).
+
+# Security
+- Implement Content Security Policy
+- Handle sensitive data properly
+- Implement proper CORS handling
+- Authentication: Secure user authentication (OAuth2 with JWT).
+- Authorization: Role-based access control (RBAC).
+- Data Protection: Protect sensitive data at rest and in transit (encryption).
+- Vulnerability Prevention: Prevent common web vulnerabilities (OWASP Top 10).
+- Input Validation: Sanitize and validate all user inputs.
+- Use Django's built-in CSRF protection. Ensure that all state-changing requests (POST, PUT, PATCH, DELETE) include the CSRF token.
+- Use Django REST Framework serializers for API request validation. Define validation rules within your serializers. Use Django model validation and database constraints (e.g., unique=True, max_length) for additional server-side validation.
+- Rate Limiting: Implement rate limiting on your API endpoints (using django-ratelimit or DRF's built-in throttling) to prevent abuse and denial-of-service attacks.
+- Security Headers: Use appropriate security headers (e.g., Content-Security-Policy, Strict-Transport-Security, X-Frame-Options, X-XSS-Protection, X-Content-Type-Options) to enhance the security of your application. Use a library like django-secure to help manage these headers.
+
+# Documentation
+- README: Maintain a clear and up-to-date README.md file with instructions for:
+- Setting up the development environment (dependencies, database setup).
+- Running the application locally.
+- Running tests.
+- Deployment instructions.
+- API Documentation: Document all API endpoints (using a tool like Swagger/OpenAPI or DRF's built-in documentation generator). Include:
+- URL
+- HTTP method
+- Request parameters (with data types and descriptions)
+- Request body (if applicable, with JSON schema)
+- Response codes (e.g., 200 OK, 400 Bad Request)
+- Response body (with JSON schema)
+- Examples
+- Code Comments: Use comments sparingly, to explain why complex logic is written the way it is. Do not use comments to state the obvious.
+- JSDoc/Docstrings: Use JSDoc (for JavaScript/TypeScript) and docstrings (for Python) to document all public functions, classes, and methods.
+- Permissions: Clearly document the required permissions for each API endpoint.
+
+# Development Workflow
+- Use proper version control
+- Implement proper code review process
+- Test in multiple environments
+- Follow semantic versioning for releases
+- Maintain changelog
+
+# Other Non Functional Requirements (NFRs) to keep in mind
+- Response Time: Fast API response times (target: under 200ms for most common operations, under 1 second absolute maximum).
+- Scalability: Ability to handle increasing numbers of users and tenants. (Horizontal scaling).
+- Database Scalability: The database must be able to handle increasing data volume.
+- Fault Tolerance: The system should be able to handle failures gracefully.
+- Caching: Implement caching (using Redis) to reduce database load and improve API response times. Cache frequently accessed data that doesn't change often (e.g., product lists, category lists, product details). Invalidate the cache when the underlying data changes. Use Django's caching framework.
+- Logging: Implement comprehensive logging. Use a structured logging format (e.g., JSON) to make it easier to analyze logs. Log errors, warnings, and important informational messages (e.g., successful order placements, inventory adjustments). Include relevant context in log messages (e.g., user ID, product ID, order ID).
+
+
+
